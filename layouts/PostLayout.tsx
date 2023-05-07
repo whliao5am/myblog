@@ -88,6 +88,17 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
                             </Link>
                           )}
                         </dd>
+                        <dt className="sr-only">Zhihu</dt>
+                        <dd>
+                          {author.zhihu && (
+                            <Link
+                              href={author.zhihu}
+                              className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                            >
+                              {author.zhihu.replace('https://www.zhihu.com/people/', '@')}
+                            </Link>
+                          )}
+                        </dd>
                       </dl>
                     </li>
                   ))}

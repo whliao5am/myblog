@@ -2,6 +2,7 @@
 const { fontFamily } = require('tailwindcss/defaultTheme')
 const colors = require('tailwindcss/colors')
 
+
 // ../node_modules/pliny/dist/**/*.mjs is needed for monorepo setup
 /** @type {import("tailwindcss/types").Config } */
 module.exports = {
@@ -31,8 +32,21 @@ module.exports = {
         sans: ['Inter', ...fontFamily.sans],
       },
       colors: {
-        primary: colors.teal,
+        // primary: colors.pink,
         gray: colors.neutral,
+        'primary': {
+          '50': '#fff1f2',
+          '100': '#ffe4e6',
+          '200': '#fecdd3',
+          '300': '#fda4af',
+          '400': '#ea8c8c',
+          '500': '#ea7070',
+          '600': '#f43f5e',
+          '700': '#be123c',
+          '800': '#9f1239',
+          '900': '#881337',
+          '950': '#4c0519',
+        },
       },
       typography: (theme) => ({
         DEFAULT: {
@@ -66,7 +80,7 @@ module.exports = {
               backgroundColor: theme('colors.gray.800'),
             },
             code: {
-              color: theme('colors.pink.500'),
+              color: theme('colors.rose.400'),
               backgroundColor: theme('colors.gray.100'),
               paddingLeft: '4px',
               paddingRight: '4px',
