@@ -13,6 +13,7 @@ const siteMetadata = {
   email: 'neroasmarr@gmail.com',
   github: 'https://github.com/NeroAsmarr',
   zhihu: 'https://www.zhihu.com/people/its5am',
+  rss: '/feed.xml',
   // facebook: 'https://facebook.com',
   // youtube: 'https://youtube.com',
   // linkedin: 'https://www.linkedin.com',
