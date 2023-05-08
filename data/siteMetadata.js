@@ -44,6 +44,8 @@ const siteMetadata = {
       // https://giscus.app/
       repo: process.env.NEXT_PUBLIC_GISCUS_REPO,
       repositoryId: process.env.NEXT_PUBLIC_GISCUS_REPOSITORY_ID,
+      // repo: 'NeroAsmarr/myblog',
+      // repositoryId: 'R_kgDOJf0T3A',
       category: process.env.NEXT_PUBLIC_GISCUS_CATEGORY,
       categoryId: process.env.NEXT_PUBLIC_GISCUS_CATEGORY_ID,
       mapping: 'pathname', // supported options: pathname, url, title
