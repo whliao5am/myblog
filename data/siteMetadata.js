@@ -1,6 +1,6 @@
 const siteMetadata = {
-  title: 'WH Liao\'s Blog',
-  author: 'Wenhao Liao',
+  title: 'WH LIAO\'s Blog',
+  author: 'Wenhao LIAO',
   headerTitle: 'HOME',
   description: '我收起伞 收起滴雨的云',
   language: 'en-us',
