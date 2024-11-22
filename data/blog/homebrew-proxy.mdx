@@ -1,0 +1,88 @@
+---
+title: 利用终端代理加速Homebrew
+date: 2023-10-20 12:00:00
+lastmod: '2023-10-20'
+tags: ['Homebrew', 'Proxy']
+draft: false
+layout: PostSimple
+---
+import Cite from '@/components/Cite'
+import Reference from '@/components/Reference'
+
+## 1. 前言
+Homebrew作为MacOS上的一站式软件包管理工具，可以方便的安装、升级、卸载各种开源工具和软件等。
+
+但是由于Homebrew默认使用的是国外的源，下载速度可能会比较慢。且Homebrew在4.0版本之后其舍弃了git下载方案，以前tap的一些仓库也有问题，相关的修改可以参考 <Cite id="ref1" index="1" />, <Cite id="ref2" index="2" />。如果不想花太多精力整理自己已有的仓库软件，本文将介绍如何利用终端代理加速Homebrew的下载速度。
+
+## 2. 准备
+- 可用的代理软件
+- Shell终端，如zsh或bash
+- Homebrew
+
+### 环境
+- MacOS 15.1
+- zsh 5.9
+
+## 3. 设置终端代理
+### 3.1 查看代理端口
+首先，需要查看代理软件的端口号，如下图,我使用的Clash Verge中默认混合端口是7897。
+<div align = "center">    
+    <img src="/static/images/brew-proxy/calsh-port.png" alt="ocean" style={{ width: '50%', height: 'auto' }} />
+    <p style={{ textAlign: 'center', color: 'gray' }}>Clash Verge 中的默认混合端口</p>
+</div>
+
+### 3.2 设置代理
+在bash或zsh的配置文件中添加如下内容<Cite id="ref3" index="3" />，其中端口号根据实际情况修改。如果是zsh，可以在`~/.zshrc`中添加，如果是bash，可以在`~/.bash_profile`中添加。
+```bash
+proxy () {
+    export http_proxy="http://127.0.0.1:7897"
+    export https_proxy="http://127.0.0.1:7897"
+    echo "HTTP Proxy on"
+}
+
+noproxy () {
+    unset http_proxy
+    unset https_proxy
+    echo "HTTP Proxy off"
+}
+```
+
+如果需要打开终端后默认开启代理，可以在配置文件中添加如下内容。
+```bash
+export http_proxy="http://127.0.0.1:7897"
+export https_proxy="http://127.0.0.1:7897"
+```
+
+然后根据bash或zsh的配置文件，执行如下命令使配置生效。
+```bash
+source ~/.zshrc
+```
+```bash
+source ~/.bash_profile
+```
+
+## 4 测试代理
+在终端中输入：
+```bash
+proxy
+curl -I www.google.com
+```
+如果返回:
+```bash
+HTTP Proxy on
+HTTP/1.1 200 OK
+```
+结果正常，说明代理设置成功。
+
+现在可以使用Homebrew进行下载和更新软件包，体验一下极速下载的感觉！
+```bash
+brew update
+```
+
+---
+**参考内容**
+
+<Reference id="ref1" index="1">[请问大家的 homebrew 安装和升级软件是不是也很慢？ - V2EX](https://v2ex.com/t/920873)</Reference>
+<Reference id="ref2" index="2">[Homebrew 升级 4.0.0，麦金塔上的啤酒会更香吗？ - 少数派](https://sspai.com/post/78587)</Reference>
+<Reference id="ref3" index="3">[让 Zsh 终端走代理 | 纸帆|ZevenFang](https://fangzf.me/2017/05/08/%E8%AE%A9-Zsh-%E7%BB%88%E7%AB%AF%E8%B5%B0%E4%BB%A3%E7%90%86/)</Reference>
+<Reference id="ref4" index="4">[终端使用代理加速的正确方式（Clash） | Ln's Blog](https://weilining.github.io/294.html)</Reference>
