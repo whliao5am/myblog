@@ -1,7 +1,7 @@
 ---
 title: 在Mac Arm中利用Docker封印不自由的EasyConnect
-date: 2024-12-24 12:00:00
-lastmod: '2024-12-24'
+date: 2024-11-24 12:00:00
+lastmod: '2024-11-24'
 tags: ['Homebrew', 'Proxy']
 draft: false
 layout: PostSimple
@@ -29,7 +29,7 @@ import Reference from '@/components/Reference'
 
 1. 在[官网](https://www.realvnc.com/en/connect/download/viewer/)下载安装VNC Viewer软件，并安装打开。
 2. 启动Easyconnect应用，并且登陆VPN内网，这时在登陆的软件界面提留，点击屏幕左上角的关于Easyconnect可以查看当前的版本，我这里的是`7.6.7`版本。docker-easyconnect的图形化版本现支持7.6.3和7.6.7两个Easyconnect版本，可在其Github页面查看。
-3. 运行以下命令下载并运行docker-easyconnect容器。这里的`PASSWORD=114514`是后面VNC Viewer需要的密码，`127.0.0.1:21080:1080`是Socks5代理端口，`127.0.0.1:5901:5901`是VNC Viewer端口。更多的参数可以参考 <Cite id="ref6" index="6"/>。
+3. 运行以下命令下载并运行docker-easyconnect容器。这里的`PASSWORD=114514`是后面VNC Viewer需要的密码，`127.0.0.1:21080:1080`是Socks5代理端口，`127.0.0.1:5901:5901`是VNC Viewer端口，`-ti`参数会开启docker的交互式使用场景，关闭终端后会退出容器，将其修改为`-d`会将容器运行与后台模式，这种模式可以退出终端而不影响容器运行。更多的参数解释可以参考 <Cite id="ref6" index="6"/>。
 
 ```bash
 docker run --rm --device /dev/net/tun --cap-add NET_ADMIN -ti \
