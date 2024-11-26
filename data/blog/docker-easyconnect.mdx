@@ -1,0 +1,91 @@
+---
+title: 在Mac Arm中利用Docker封印不自由的EasyConnect
+date: 2024-12-26 12:00:00
+lastmod: '2024-12-26'
+tags: ['Homebrew', 'Proxy']
+draft: false
+layout: PostSimple
+---
+import Cite from '@/components/Cite'
+import Reference from '@/components/Reference'
+
+<TOCInline toc={props.toc} toHeading={2} />
+
+## 1. 前言
+前一阵子在使用关闭代理时，国内很多网站都突然无法访问，一直以为是代理污染DNS，浏览器配置等问题，尝试了很多解决方法没有用。最后发现是因为EasyConnect一直挂在后台的原因，关闭EasyConnect后就一切正常了。但是我平时工作需要使用EasyConnect进行远程ssh等，所以不能关闭EasyConnect，寻找方案的过程中发现了这篇帖子介绍了使用Docker封印EasyConnect的方法，过程中间遇到一些坑最后得以解决，此贴记录解决方案。
+
+其实在查找资料过程中，发现Easyconnect这个软件的过去劣迹斑斑，自动启动且无法退出的root后台应用EasyMonitor和ECAgentProxy，且必须安装深信服自己的根证书才能使用。属于是系统和流量行为它想获取就可以获取 <Cite id="ref1" index="1"/>, <Cite id="ref2" index="2"/>。
+
+## 2. 准备
+- Easyconnect (用以查看使用的VPN版本, 后续会提供删除方案)
+
+### 环境
+- MacOS 15.1
+- Mac M1 Pro
+- Docker, Client&Server version == 27.3.1
+
+## 3. 安装docker-easyconnect
+在docker-easyconnect项目 <Cite id="ref5" index="5"/>, 可以看到其提供有两个版本：纯命令行版和图形界面版。纯命令版本我尝试过很多相关issues和文章方案，均无法运行成功，所以下面均图形界面版的操作。
+
+1. 在[官网](https://www.realvnc.com/en/connect/download/viewer/)下载安装VNC Viewer软件，并安装打开。
+2. 启动Easyconnect应用，并且登陆VPN内网，这时在登陆的软件界面提留，点击屏幕左上角的关于Easyconnect可以查看当前的版本，我这里的是`7.6.7`版本。docker-easyconnect的图形化版本现支持7.6.3和7.6.7两个Easyconnect版本，可在其Github页面查看。
+3. 运行以下命令下载并运行docker-easyconnect容器。这里的`PASSWORD=114514`是后面VNC Viewer需要的密码，`127.0.0.1:21080:1080`是Socks5代理端口，`127.0.0.1:5901:5901`是VNC Viewer端口。更多的参数可以参考 <Cite id="ref6" index="6"/>。
+
+```bash
+docker run --rm --device /dev/net/tun --cap-add NET_ADMIN -ti \
+-e PASSWORD=114514 \
+-e URLWIN=1 \
+-e DISABLE_PKG_VERSION_XML=1 \
+-v $HOME/.ecdata:/root \
+-p 127.0.0.1:5901:5901 \
+-p 127.0.0.1:1080:1080 \
+-p 127.0.0.1:1888:8888 \
+-e CLIP_TEXT=https://vpn.hitsz.edu.cn/ \
+hagb/docker-easyconnect:7.6.7
+```
+
+4. 打开VNC Viewer，输入`127.0.0.1:5901`进入后输入密码`114514`，即可看到Easyconnect的界面，输入账号密码登陆即可。
+<div align = "center">    
+    <img src="/static/images/docker-easyconnect/vnc-viewer.png" alt="vnc viewer" style={{ width: '50%', height: 'auto' }} />
+    <p style={{ textAlign: 'center', color: 'gray' }}>VNC Viewer登陆</p>
+</div>
+
+## 4. 测试docker-easyconnect
+登陆后保持Docker容器和VNC运行，然后测试是否能成功通过Easyconnect连接内网。我这里使用ssh通过socks5代理连接内网主机 <Cite id="ref7" index="7"/>，需把`user_name`和`host_ip`替换为实际的用户名和主机IP。
+```bash
+ssh -o ProxyCommand="nc -X 5 -x 127.0.0.1:1080 %h %p" user_name@host_ip
+```
+
+也可以使用curl命令通过socks5代理获取内网网页测试，如：
+```bash
+curl --socks5 <proxy_host>:<proxy_port> http://example.com
+```
+
+## 5. 后续设置
+### 5.1 配置ssh代理
+可以把配置写入ssh config中：
+```bash
+echo -e "Host S1
+    HostName host_ip
+    User user_name
+    ProxyCommand nc -X 5 -x 127.0.0.1:1080 %h %p" >> ~/.ssh/config
+```
+后面想再连接内网主机时，只需输入`ssh S1`即可，其会自动使用socks5代理连接相关主机。
+
+### 5.2 卸载Easyconnect
+上述配置与测试都完成后，便可以卸载系统应用里面的Easyconnect了，Easyconnect的完全卸载方案可以参考 <Cite id="ref1" index="1"/>, <Cite id="ref2" index="2"/>, <Cite id="ref3" index="3"/>, <Cite id="ref4" index="4"/>。
+
+### 5.3 其他代理
+如果想通过Easyconnect访问网页等，可以通过安装chrome插件：Proxy SwitchyOmega进行代理，参考 <Cite id="ref6" index="6"/>。也可以通过代理软件如Clash等进行代理，参考 <Cite id="ref8" index="8"/>。
+
+---
+**参考内容**
+
+<Reference id="ref1" index="1">[转发给你的同学看看 如何应对与卸载删除它？有什么替代方案？\_哔哩哔哩\_bilibili](https://www.bilibili.com/video/BV163411Z7BD)</Reference>
+<Reference id="ref2" index="2">[EasyConnect 你想干甚？—— 干掉 macOS 版 EasyConnect 的流氓行为 | Lufs's Blog](https://blog.isteed.cc/post/fuck-easyconnect-on-macos)</Reference>
+<Reference id="ref3" index="3">[Mac 删除深信服 EasyConnect 的 EasyMoniter、ECAgent 的开机启动和根证书的方法 - V2EX](https://v2ex.com/t/762221)</Reference>
+<Reference id="ref4" index="4">[在linux上优雅地使用EasyConnect – 平凡生活小记](https://caveallegory.cn/2023/07/%E5%9C%A8linux%E4%B8%8A%E4%BC%98%E9%9B%85%E5%9C%B0%E4%BD%BF%E7%94%A8easyconnect/)</Reference>
+<Reference id="ref5" index="5">[docker-easyconnect/docker-easyconnect](https://github.com/docker-easyconnect/docker-easyconnect)</Reference>
+<Reference id="ref6" index="6">[[纯净化安装EasyConnect：macOS Sonoma使用docker安装EasyConnect---docker-easyconnect\_easyconnect mac-CSDN博客](https://blog.csdn.net/qq719779232/article/details/136716520)</Reference>
+<Reference id="ref7" index="7">[让你的SSH通过HTTP代理或者SOCKS5代理](https://kuokuo.io/2019/07/01/ssh-over-http-or-socks/)</Reference>
+<Reference id="ref8" index="8">[解决EasyConnect的毒瘤行为 | 月青悠](https://vccv.cc/article/docker-easyconnect.html)</Reference>
